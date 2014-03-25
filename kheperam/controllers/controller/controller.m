@@ -8,12 +8,9 @@
 TIME_STEP = 64;
 SENSOR_COUNT = 8;
 % DISTANCE_THRESH = 600;
-P_GAIN = 0.01;
-I_GAIN = 0.01;
+GAIN = 0.01;
 
-RATIO = 5;
-errors = [0 0 0 0 0 0 0 0];
-distance_thresh = [0, 0, 0, 0, 500, 700, 0, 0];
+distance_thresh = [0, 0, 500, 500, 500, 600, 0, 0];
 
 SPEED_FACTOR = 5;
 
@@ -34,10 +31,10 @@ while wb_robot_step(TIME_STEP) ~= -1
     end
 
     for i = 1: SENSOR_COUNT
-    	[motors_pid(i), errors(i)] = pid(sensor_values(i), distance_thresh(i), P_GAIN, I_GAIN, errors(i));
+    	motors_pid(i) = pid(sensor_values(i), distance_thresh(i), GAIN);
     end
 
-    front_distance = sensor_values(4);
+    front_distance = sensor_values(3);
 
     left_motor = 0;
     right_motor = 0;
@@ -46,8 +43,13 @@ while wb_robot_step(TIME_STEP) ~= -1
     left_motor = motors_pid(4);
     right_motor = - motors_pid(6) * SPEED_FACTOR;
 
-	left_motor = clamp(SPEED_FACTOR + (RATIO * motors_pid(4)), -5, 5);
-	right_motor = - (motors_pid(5) + 2 * motors_pid(6)) * SPEED_FACTOR;
+    % if front_distance > 600
+    % 	left_motor = -SPEED_FACTOR;
+    % 	right_motor = SPEED_FACTOR;
+    % else
+    % 	left_motor = 1 * SPEED_FACTOR;
+    % 	right_motor = -(motors_pid(5) + 2 * motors_pid(6)) * SPEED_FACTOR;
+    % end
 
     wb_differential_wheels_set_speed(left_motor, right_motor);
 
@@ -75,3 +77,5 @@ while wb_robot_step(TIME_STEP) ~= -1
 	drawnow;
 
 end
+
+% cleanup code goes here: write data to files, etc.
