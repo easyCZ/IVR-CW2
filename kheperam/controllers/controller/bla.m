@@ -8,19 +8,20 @@
 TIME_STEP = 64;
 SENSOR_COUNT = 8;
 % DISTANCE_THRESH = 600;
-P_GAIN = 0.01;
-I_GAIN = 0.0002;
+P_GAIN = 0.001;
+I_GAIN = 0.0005;
 
 TURN_THRESH = 5;
 
 
 errors = [0 0 0 0 0 0 0 0];
-distance_thresh = [0, 0, 500, 500, 300, 600, 0, 0];
+distance_thresh = [0, 0, 0, 0, 300, 600, 0, 0];
 
-SPEED_FACTOR = 5;
+SPEED_FACTOR = 10;
 
 is_turning = 0;
-turn_distance = 0;
+turn_distance = 600;
+found_wall = 0;
 
 
 
@@ -43,19 +44,18 @@ while wb_robot_step(TIME_STEP) ~= -1
     % left_motor = (motors_pid(3) + motors_pid(4)) / 2.0;
 
     if is_turning
-    	if sensor_values(6) == 0
+    	if abs(sensor_values(6) - turn_distance) < TURN_THRESH
     		is_turning = 0;
-    		errors = [0, 0, 0, 0, 0, 0, 0, 0];
     		left_motor = motors_pid(4);
 	    	right_motor = - motors_pid(6) * SPEED_FACTOR;
     	else
     		left_motor = -3;
     		right_motor = 3;
     	end
+
     else
-    	if sensor_values(4) > 600
+    	if sensor_values(4) > 700
     		is_turning = 1;
-    		turn_distance = sensor_values(4);
     		left_motor = -3;
     		right_motor = 3;
     	else
