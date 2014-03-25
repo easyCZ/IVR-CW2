@@ -7,17 +7,23 @@
 
 TIME_STEP = 64;
 SENSOR_COUNT = 8;
+% DISTANCE_THRESH = 600;
+P_GAIN = 0.001;
+I_GAIN = 0.0005;
 
-distance_thresh = 600;
-% 0.0125 so that (1000 - 600) * 0.0125 = 400 * 0.0125 = 5
-P_GAIN = 0.05;
+TURN_THRESH = 5;
 
-% no idea what this should be
-I_GAIN = 0.0002;
 
-is_turning = false;
-turn_distance = 0;
-errors = 0;
+errors = [0 0 0 0 0 0 0 0];
+distance_thresh = [0, 0, 0, 0, 300, 600, 0, 0];
+
+SPEED_FACTOR = 10;
+
+is_turning = 0;
+turn_distance = 600;
+found_wall = 0;
+
+
 
 % Get and enable distance sensors
 for i = 1 : SENSOR_COUNT
@@ -30,30 +36,31 @@ end
 while wb_robot_step(TIME_STEP) ~= -1
 
 	% Obtain sensor values
-	for i = 1 : SENSOR_COUNT
+   	for i = 1: SENSOR_COUNT
         sensor_values(i) = wb_distance_sensor_get_value(ps(i));
+    	[motors_pid(i), errors(i)] = pid(sensor_values(i), distance_thresh(i), P_GAIN, I_GAIN, errors(i));
     end
-	[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
+
+    % left_motor = (motors_pid(3) + motors_pid(4)) / 2.0;
 
     if is_turning
-    	if sensor_values(5) == 0
-    		is_turning = false;
-    		errors = 0;
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    	if abs(sensor_values(6) - turn_distance) < TURN_THRESH
+    		is_turning = 0;
+    		left_motor = motors_pid(4);
+	    	right_motor = - motors_pid(6) * SPEED_FACTOR;
     	else
     		left_motor = -3;
     		right_motor = 3;
     	end
+
     else
-    	if sensor_values(4) > 670 & sensor_values(3) > 670
-    		is_turning = true;
-    		turn_distance = sensor_values(4);
+    	if sensor_values(4) > 700
+    		is_turning = 1;
     		left_motor = -3;
     		right_motor = 3;
     	else
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    		left_motor = motors_pid(4);
+	    	right_motor = - motors_pid(6) * SPEED_FACTOR;
     	end
 	end
 
