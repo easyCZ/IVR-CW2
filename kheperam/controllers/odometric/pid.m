@@ -1,6 +1,7 @@
-function [out, err] = pid(pv, setpoint, p_gain, i_gain, err)
+% PI Controller implementation
+function [out, acum_error] = pid(pv, setpoint, p_gain, i_gain, acum_error)
 	p = (setpoint - pv) * p_gain;
 	ii = (setpoint - pv) * i_gain;
-	err = err + ii;
-	out = p + err;
+	acum_error = acum_error + ii;
+	out = p + acum_error;
 end
