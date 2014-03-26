@@ -121,7 +121,9 @@ Using odometry with the Kepehera robots requires the use of encoders as the simu
 
 Firstly, we enable the use of encoders, passing in the *TIME_STAMP*.
 
-```wb_differential_wheels_enable_encoders(TIME_STEP);```
+```
+wb_differential_wheels_enable_encoders(TIME_STEP);
+```
 
 Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted millimeters to be consistent with the rest of the units in the implementation.
 
