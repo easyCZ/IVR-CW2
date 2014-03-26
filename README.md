@@ -65,11 +65,15 @@ end
 
 Secondly, we calculate the PID value of the sensor located at three o'clock of the robot given the ideal distance from the wall `distance_thresh`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
 
-```[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);```
+```
+[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
+```
 
 Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important to be maintain reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
 
-```vright = clamp(-motors_pid, -10, 10);```
+```
+vright = clamp(-motors_pid, -10, 10);
+```
 
 Next, we split the speed on the left motor and the right motor between total speed of 12. If the ideal speed is 6 on each motor when going straight, the distribution of speeds allows the robot to correct for non ideal distances from the wall.
 
@@ -77,11 +81,15 @@ For example, if the robot is far away from the wall and the sensor reads a value
 
 The distribution of speeds for each wheel is done with the following code:
 
-```vleft = 12 - abs(vright);```
+```
+vleft = 12 - abs(vright);
+```
 
 Finally, the motor speeds of the Kephera robot are updates:
 
-```wb_differential_wheels_set_speed(vleft, vright);```
+```
+wb_differential_wheels_set_speed(vleft, vright);
+```
 
 
 ## 2.3 Obstacle Avoidance
@@ -171,9 +179,9 @@ The lines merge together as there is one very narrow path around the obstacles a
 
 The robot does not have any issues when approaching, entering and leaving the corner points of the world. This is due to the carefully selected value of distance threshold of 700 which allows it to stay in the middle the walls leaving enough room for maneuverability.
 
+In the case of a room with no obstacles, the robot has no issues running around. The image below shows the environment
+
 The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
-
-
 
 ## 3.2 Obstacle Avoidance
 
