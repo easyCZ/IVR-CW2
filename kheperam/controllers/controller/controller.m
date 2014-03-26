@@ -42,7 +42,7 @@ while wb_robot_step(TIME_STEP) ~= -1
     		vright = clamp(-motors_pid, -10, 10);
 	    	vleft = 12 - abs(vright);
             if vright < -9
-                vleft = 10
+                vleft = 10;
             end
     	else
     		vleft = -3;
@@ -58,7 +58,7 @@ while wb_robot_step(TIME_STEP) ~= -1
     		vright = clamp(-motors_pid, -10, 10);
 	    	vleft = 12 - abs(vright);
             if vright < -9
-                vleft = 10
+                vleft = 10;
             end
     	end
 	end
