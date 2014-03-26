@@ -166,11 +166,8 @@ The image below shows how the robot stabilizes its position relative to the wall
 
 ### 3.1.1 Narrow hallway with obstacles
 
-The world we will be using to test the implementation is displayed below.
-![World A](./img/partA_start_pos.png)
-
-The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The chart below shows the locations of the robot in the environment as it moves. The red dot (larger circle) marks the starting position.
-![Obstacle chart](./img/obstacle_chart.png)
+The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The image shows the movements of the robot on the image. The robot initially moves right and forward.
+![Obstacle chart](./img/obstacle_chart2.png)
 
 The lines merge together as there is one very narrow path around the obstacles and the same path is taken when going both ways.
 
