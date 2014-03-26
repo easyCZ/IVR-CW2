@@ -86,7 +86,34 @@ Finally, the motor speeds of the Kephera robot are updates:
 
 ## 2.3 Obstacle Avoidance
 
-Obstace avoidance
+Obstacle avoidance requires the PID results to be overridden as PID is not suitable for obstacle avoidance. When avoiding an obstacle, the controller switches into a `turning` mode where it will rotate on the spot to the left until the sensor readings indicate that a turn has been made and it is okay to switch back to line following mode. In the implementation, this is done with nested if statements.
+
+### 2.3.1 Detecting obstacles
+In order to detect an obstacle in front of the robot, we use two sensors located at the front of the robot. If an obstacle closer to a threshold is detected, the robot switches into *turn* mode, indicated by `is_turning` flag, and begins rotating left on the spot.
+
+```
+if sensor_values(4) > 670 & sensor_values(3) > 670
+    is_turning = true;
+    turn_distance = sensor_values(4);
+    vleft = -3;
+    vright = 3;
+```
+
+### 2.3.2 Rotations
+
+When the robot is in the *turning* mode, the robot will keep rotating until the sensor located on the right hand side at two o'clock is below a threshold. The mode is switched back to *follow a line* and the errors collected for the PID are re-set.
+
+```
+if is_turning
+    if sensor_values(5) <= 400
+        is_turning = false;
+        errors = 0;
+        ...
+    else
+        vleft = -3;
+        vright = 3;
+    end
+```
 
 ## 2.4 Odometry
 
