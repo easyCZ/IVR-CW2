@@ -36,30 +36,36 @@ while wb_robot_step(TIME_STEP) ~= -1
 	[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
 
     if is_turning
-    	if sensor_values(5) == 0
+    	if sensor_values(5) <= 400
     		is_turning = false;
     		errors = 0;
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    		vright = clamp(-motors_pid, -10, 10);
+	    	vleft = 12 - abs(vright);
+            if vright < -9
+                vleft = 10
+            end
     	else
-    		left_motor = -3;
-    		right_motor = 3;
+    		vleft = -3;
+    		vright = 3;
     	end
     else
     	if sensor_values(4) > 670 & sensor_values(3) > 670
     		is_turning = true;
     		turn_distance = sensor_values(4);
-    		left_motor = -3;
-    		right_motor = 3;
+    		vleft = -3;
+    		vright = 3;
     	else
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    		vright = clamp(-motors_pid, -10, 10);
+	    	vleft = 12 - abs(vright);
+            if vright < -9
+                vleft = 10
+            end
     	end
 	end
 
-    wb_differential_wheels_set_speed(left_motor, right_motor);
+    wb_differential_wheels_set_speed(vleft, vright);
 
-    % speeds = [left_motor, right_motor]
+    % speeds = [vleft, vright]
 
 	drawnow;
 

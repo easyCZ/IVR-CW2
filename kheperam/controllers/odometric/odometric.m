@@ -7,6 +7,7 @@
 
 TIME_STEP = 64;
 SENSOR_COUNT = 8;
+R = 25.2;
 
 distance_thresh = 600;
 % 0.0125 so that (1000 - 600) * 0.0125 = 400 * 0.0125 = 5
@@ -18,6 +19,8 @@ I_GAIN = 0.0002;
 is_turning = false;
 turn_distance = 0;
 errors = 0;
+
+x = 0; y = 0; theta = 0;
 
 % Get and enable distance sensors
 for i = 1 : SENSOR_COUNT
@@ -39,27 +42,40 @@ while wb_robot_step(TIME_STEP) ~= -1
     	if sensor_values(5) == 0
     		is_turning = false;
     		errors = 0;
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    		vright = clamp(-motors_pid, -10, 10);
+	    	vleft = 12 - abs(vright);
+    		if vright < -9
+    			vleft = 6
+    		end
     	else
-    		left_motor = -3;
-    		right_motor = 3;
+    		vleft = -3;
+    		vright = 3;
     	end
     else
     	if sensor_values(4) > 670 & sensor_values(3) > 670
     		is_turning = true;
     		turn_distance = sensor_values(4);
-    		left_motor = -3;
-    		right_motor = 3;
+    		vleft = -3;
+    		vright = 3;
     	else
-    		right_motor = clamp(-motors_pid, -10, 10);
-	    	left_motor = 12 - abs(right_motor);
+    		vright = clamp(-motors_pid, -10, 10);
+	    	vleft = 12 - abs(vright);
+    		if vright < -9
+    			vleft = 6
+    		end
     	end
 	end
 
-    wb_differential_wheels_set_speed(left_motor, right_motor);
+	% Odometry shit
+	x = x + 0.5 * (vleft + vright) * cos(theta);
+	y = y + 0.5 * (vleft + vright) * sin(theta);
+	theta = theta - 0.5 * (vleft - vright) / (2 * R);
+	disp([x y theta]);
 
-    % speeds = [left_motor, right_motor]
+
+    wb_differential_wheels_set_speed(vleft, vright);
+
+    % speeds = [vleft, vright]
 
 	drawnow;
 
