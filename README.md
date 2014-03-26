@@ -121,6 +121,8 @@ if is_turning
 
 ## 3.1 Distance Control
 
+![alt text](./img/wall_follower_chart.png)
+
 ## 3.2 Obstacle Avoidance
 
 ## 3.3 Returning home
