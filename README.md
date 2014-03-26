@@ -115,6 +115,8 @@ if is_turning
     end
 ```
 
+We have made the decision to go with values of 3 and -3 through experimentations.
+
 ## 2.4 Odometry
 
 Using odometry with the Kepehera robots requires the use of encoders as the simulator environment attempts to model real world conditions and accounts for wheel slippage.
@@ -157,7 +159,28 @@ end
 
 ## 3.1 Distance Control
 
-![alt text](./img/wall_follower_chart.png)
+The implementation aims to keep a constant distance from the walls. The ideal value for the sensor reading is set to be 700 which the robot to fit in spaces enclosed with 3 sides. In order to test how well the robot is able to find the equilibrium distance from the wall. The PI controller causes the distance from the wall to fluctuate and converge to the equilibrium page.
+
+The image below shows how the robot stabilizes its position relative to the wall as it runs straight. There are still fluctuations, but the values are getting progressively smoother.
+![Wall follower chart](./img/wall_follower_chart.png)
+
+### 3.1.1 Narrow hallway with obstacles
+
+The world we will be using to test the implementation is displayed below.
+![World A](./img/partA_start_pos.png)
+
+The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The chart below shows the locations of the robot in the environment as it moves. The red dot (larger circle) marks the starting position.
+![Obstacle chart](./img/obstacle_chart.png)
+
+The lines merge together as there is one very narrow path around the obstacles and the same path is taken when going both ways.
+
+The robot does not have any issues when approaching, entering and leaving the corner points of the world. This is due to the carefully selected value of distance threshold of 700 which allows it to stay in the middle the walls leaving enough room for maneuverability.
+
+The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
+
+### 3.1.2 Rectangular room without obstacles
+
+
 
 ## 3.2 Obstacle Avoidance
 
