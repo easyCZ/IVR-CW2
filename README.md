@@ -117,6 +117,42 @@ if is_turning
 
 ## 2.4 Odometry
 
+Using odometry with the Kepehera robots requires the use of encoders as the simulator environment attempts to model real world conditions and accounts for wheel slippage.
+
+Firstly, we enable the use of encoders, passing in the *TIME_STAMP*.
+
+```
+wb_differential_wheels_enable_encoders(TIME_STEP);
+```
+
+Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted millimeters to be consistent with the rest of the units in the implementation.
+
+```
+encoder_values = [wb_differential_wheels_get_left_encoder() wb_differential_wheels_get_right_encoder()];
+encoder_values = encoder_values / (2 * 100.0 * pi);
+encoder_values = encoder_values * 2 * pi * WHEEL_RADIUS;
+```
+
+Thirdly, we calculate relative position changes and update our internal coordinate system with the *x, y* and *angle* values.
+
+```
+x = x + 0.5 * (encoder_values(1) + encoder_values(2)) * cos(theta);
+y = y + 0.5 * (encoder_values(1) + encoder_values(2)) * sin(theta);
+theta = theta - 0.5 * (encoder_values(1) - encoder_values(2)) / (ROBOT_RADIUS);
+```
+
+To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold.
+
+```
+if abs(x) < 3 & abs(y) < 3 & ready_to_stop
+    wb_differential_wheels_set_speed(0, 0);
+    ...
+else
+    % Mark the location as ready_to_stop
+    ...
+end
+```
+
 # 3 Results
 
 ## 3.1 Distance Control
@@ -130,3 +166,5 @@ if is_turning
 # 4 Discussion
 
 ## 4.1 Future Improvements
+
+## 4.2 Work distribution
