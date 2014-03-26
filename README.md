@@ -54,10 +54,39 @@ The resulting action will be stronger if the error is high and vice versa. The a
 
 ## 2.2 Wall following
 
+Wall following is done using only one sensor, namely the sensor located at three o'clock of the robot. The robot only rotates one way and follows the wall on its right hand side.
 
+Firstly, we obtain the distance readings from the sensors. The readings are saved into a list of `sensor_values`.
+```
+for i = 1 : SENSOR_COUNT
+    sensor_values(i) = wb_distance_sensor_get_value(ps(i));
+end
+```
+
+Secondly, we calculate the PID value of the sensor located at three o'clock of the robot given the ideal distance from the wall `distance_thresh`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
+
+```[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);```
+
+Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important to be maintain reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
+
+```vright = clamp(-motors_pid, -10, 10);```
+
+Next, we split the speed on the left motor and the right motor between total speed of 12. If the ideal speed is 6 on each motor when going straight, the distribution of speeds allows the robot to correct for non ideal distances from the wall.
+
+For example, if the robot is far away from the wall and the sensor reads a value of 200, we will obtain a value smaller than 5 from `motors_pid`. This will result in the left motor getting a larger slice of the total speed and turn faster, brining the robot closer to the wall.
+
+The distribution of speeds for each wheel is done with the following code:
+
+```vleft = 12 - abs(vright);```
+
+Finally, the motor speeds of the Kephera robot are updates:
+
+```wb_differential_wheels_set_speed(vleft, vright);```
 
 
 ## 2.3 Obstacle Avoidance
+
+Obstace avoidance
 
 ## 2.4 Odometry
 
