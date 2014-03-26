@@ -27,12 +27,26 @@ x = 0; y = 0; theta = 0;
 
 % Get and enable distance sensors
 for i = 1 : SENSOR_COUNT
-  ps(i) = wb_robot_get_device(['ds' int2str(i-1)]);
-  wb_distance_sensor_enable(ps(i), TIME_STEP);
+    ps(i) = wb_robot_get_device(['ds' int2str(i-1)]);
+    wb_distance_sensor_enable(ps(i), TIME_STEP);
+    sensor_values(i) = wb_distance_sensor_get_value(ps(i));
 end
+
+
+% we are not near a wall so go forward until we hit something
+while wb_robot_step(TIME_STEP) ~= -1 & sensor_values(3) <= WALL_THRESH & sensor_values(4) <= WALL_THRESH & sensor_values(6) <= WALL_THRESH
+    wb_differential_wheels_set_speed(3, 3);
+    % Obtain sensor values
+    for i = 1 : SENSOR_COUNT
+        sensor_values(i) = wb_distance_sensor_get_value(ps(i));
+    end
+end
+
 
 % Enable the wheel encoders
 wb_differential_wheels_enable_encoders(TIME_STEP);
+wb_differential_wheels_set_encoders(0, 0);
+
 
 % Main loop
 while wb_robot_step(TIME_STEP) ~= -1
