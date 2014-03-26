@@ -22,6 +22,8 @@ Following a wall is based on the concept of a *Proportional Integral Derivative*
 
 In order to avoid obstacles in the path, we switch a *rotate* mode where the wheels of the robot are set to rotate on the spot. The *rotate* mode is exited when the sensor provide sufficient evidence of having rotated enough. In the next stage the PID controller is restarted and following a wall is resumed.
 
+Returning to the home location is done through relative odometry calculations. Initially, the relative location of the robot is zero and every action updates the internal representation of position. As the robot approaches its home location, the relative location will be approaching zero and the robot stops.
+
 #2 Methods
 
 ## 2.1 Wall following
