@@ -192,7 +192,17 @@ The robot would run into issues if the space required to 'park' the robot would 
 
 Generally, the robot is able to avoid all convex obstacles. In a couple of instances the robot crashes into the corner of the obstacle. This, however, only occurs in couple of instances. The image below shows a case where the robot may get stuck.
 
+[!Robot stuck](img/robot_stuck.png)
+
 A possible solution to this problem is better fine tuning of the parameters and using multiple sensors.
+
+Additionally, when avoiding an obstacle the robot may overturn slightly, this could be improved through better sensor reading. The images below show this case.
+
+![Ideal turn](img/partA_overturn_correction.png)
+
+![Over-turn](img/partA_overturn1.png)
+
+On the second image, the robot has gone too far and will not attempt to find the wall again in a jerky motion. This could be improved through a faster update of the sensor values.
 
 ## 3.3 Returning home
 
