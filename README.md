@@ -52,6 +52,10 @@ Finally, the return value of the PI Controller becomes the sum of the cumulative
 
 The resulting action will be stronger if the error is high and vice versa. The actions will eventually stabilize in an equilibrium until an obstacle or non-straight line object is found.
 
+The values of *P_GAIN = 0.05;* was selected based on the following formula. Ideally we want the right sensor reading to be 700, setting the ideal position at 600 results in a 100 unit difference. We wanted to set the speed of 5 at that point so we set the P_GAIN to *0.05* to make it 5 when scaled down.
+
+The value of *I_GAIN = 0.0.002* was selected experimentally.
+
 ## 2.2 Wall following
 
 Wall following is done using only one sensor, namely the sensor located at three o'clock of the robot. The robot only rotates one way and follows the wall on its right hand side.
@@ -65,11 +69,15 @@ end
 
 Secondly, we calculate the PID value of the sensor located at three o'clock of the robot given the ideal distance from the wall `distance_thresh`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
 
-```[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);```
+```
+[motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
+```
 
 Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important to be maintain reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
 
-```vright = clamp(-motors_pid, -10, 10);```
+```
+vright = clamp(-motors_pid, -10, 10);
+```
 
 Next, we split the speed on the left motor and the right motor between total speed of 12. If the ideal speed is 6 on each motor when going straight, the distribution of speeds allows the robot to correct for non ideal distances from the wall.
 
@@ -77,11 +85,15 @@ For example, if the robot is far away from the wall and the sensor reads a value
 
 The distribution of speeds for each wheel is done with the following code:
 
-```vleft = 12 - abs(vright);```
+```
+vleft = 12 - abs(vright);
+```
 
 Finally, the motor speeds of the Kephera robot are updates:
 
-```wb_differential_wheels_set_speed(vleft, vright);```
+```
+wb_differential_wheels_set_speed(vleft, vright);
+```
 
 
 ## 2.3 Obstacle Avoidance
@@ -127,7 +139,7 @@ Firstly, we enable the use of encoders, passing in the *TIME_STAMP*.
 wb_differential_wheels_enable_encoders(TIME_STEP);
 ```
 
-Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted millimeters to be consistent with the rest of the units in the implementation.
+Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted to millimeters to be consistent with the rest of the units in the implementation.
 
 ```
 encoder_values = [wb_differential_wheels_get_left_encoder() wb_differential_wheels_get_right_encoder()];
@@ -135,7 +147,7 @@ encoder_values = encoder_values / (2 * 100.0 * pi);
 encoder_values = encoder_values * 2 * pi * WHEEL_RADIUS;
 ```
 
-Thirdly, we calculate relative position changes and update our internal coordinate system with the *x, y* and *angle* values.
+Thirdly, we calculate relative position changes and update our internal coordinate system with the *x*, *y* and *angle* values.
 
 ```
 x = x + 0.5 * (encoder_values(1) + encoder_values(2)) * cos(theta);
@@ -143,7 +155,7 @@ y = y + 0.5 * (encoder_values(1) + encoder_values(2)) * sin(theta);
 theta = theta - 0.5 * (encoder_values(1) - encoder_values(2)) / (ROBOT_RADIUS);
 ```
 
-To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold.
+To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold - we use 3 millimeters.
 
 ```
 if abs(x) < 3 & abs(y) < 3 & ready_to_stop
@@ -155,6 +167,10 @@ else
 end
 ```
 
+## 2.5 Thresholds
+
+Majority of the thresholds used in the implementation were selected through experimentation. In order to make our thresholding easier, we limited ourselves to one threshold at a time, only adding the next once fairly good values have been obtained.
+
 # 3 Results
 
 ## 3.1 Distance Control
@@ -162,9 +178,11 @@ end
 The implementation aims to keep a constant distance from the walls. The ideal value for the sensor reading is set to be 700 which the robot to fit in spaces enclosed with 3 sides. In order to test how well the robot is able to find the equilibrium distance from the wall. The PI controller causes the distance from the wall to fluctuate and converge to the equilibrium page.
 
 The image below shows how the robot stabilizes its position relative to the wall as it runs straight. There are still fluctuations, but the values are getting progressively smoother.
+
 ![Wall follower chart](./img/wall_follower_chart.png)
 
 The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The image shows the movements of the robot on the image. The robot initially moves right and forward.
+
 ![Obstacle chart](./img/obstacle_chart2.png)
 
 The lines merge together as there is one very narrow path around the obstacles and the same path is taken when going both ways.
@@ -173,14 +191,20 @@ The robot does not have any issues when approaching, entering and leaving the co
 
 The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
 
-
-
 ## 3.2 Obstacle Avoidance
 
 ## 3.3 Returning home
+
+The robot is returning to the point of origin reliably. The threshold of 3 millimeters seems to be satisfactory. We have had one case where the robot did not stop at the point of origin because the displacement in both *x* and *y* was greater than 3. However, this only a single occurence and we were not able to reproduce it. Below is a picture of an example environment that we tested odometry on and a scatter plot of *x* and *y* positions relative to the origin.
+
+![No obstacles environment](./img/wall_follow_screen.png)
+
+![No obstacles chart](./img/odometry_chart.png)
 
 # 4 Discussion
 
 ## 4.1 Future Improvements
 
 ## 4.2 Work distribution
+
+We have worked on the assignment together. The work distribution should be 50:50.
