@@ -170,22 +170,28 @@ end
 The implementation aims to keep a constant distance from the walls. The ideal value for the sensor reading is set to be 700 which the robot to fit in spaces enclosed with 3 sides. In order to test how well the robot is able to find the equilibrium distance from the wall. The PI controller causes the distance from the wall to fluctuate and converge to the equilibrium page.
 
 The image below shows how the robot stabilizes its position relative to the wall as it runs straight. There are still fluctuations, but the values are getting progressively smoother.
+
 ![Wall follower chart](./img/wall_follower_chart.png)
 
 The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The image shows the movements of the robot on the image. The robot initially moves right and forward.
+
 ![Obstacle chart](./img/obstacle_chart2.png)
 
 The lines merge together as there is one very narrow path around the obstacles and the same path is taken when going both ways.
 
 The robot does not have any issues when approaching, entering and leaving the corner points of the world. This is due to the carefully selected value of distance threshold of 700 which allows it to stay in the middle the walls leaving enough room for maneuverability.
 
-In the case of a room with no obstacles, the robot has no issues running around. The image below shows the environment
-
 The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
 
 ## 3.2 Obstacle Avoidance
 
 ## 3.3 Returning home
+
+In the case of a room with no obstacles, the robot has no issues running around. The image below shows the environment.
+
+![No rooms env](./img/wall_follow_screen.png)
+
+![No rooms env track](./img/odometry_chart.png)
 
 # 4 Discussion
 
