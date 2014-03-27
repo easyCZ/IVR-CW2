@@ -135,7 +135,7 @@ Firstly, we enable the use of encoders, passing in the *TIME_STAMP*.
 wb_differential_wheels_enable_encoders(TIME_STEP);
 ```
 
-Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted millimeters to be consistent with the rest of the units in the implementation.
+Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted to millimeters to be consistent with the rest of the units in the implementation.
 
 ```
 encoder_values = [wb_differential_wheels_get_left_encoder() wb_differential_wheels_get_right_encoder()];
@@ -143,7 +143,7 @@ encoder_values = encoder_values / (2 * 100.0 * pi);
 encoder_values = encoder_values * 2 * pi * WHEEL_RADIUS;
 ```
 
-Thirdly, we calculate relative position changes and update our internal coordinate system with the *x, y* and *angle* values.
+Thirdly, we calculate relative position changes and update our internal coordinate system with the *x*, *y* and *angle* values.
 
 ```
 x = x + 0.5 * (encoder_values(1) + encoder_values(2)) * cos(theta);
@@ -151,7 +151,7 @@ y = y + 0.5 * (encoder_values(1) + encoder_values(2)) * sin(theta);
 theta = theta - 0.5 * (encoder_values(1) - encoder_values(2)) / (ROBOT_RADIUS);
 ```
 
-To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold.
+To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold - we use 3 millimeters.
 
 ```
 if abs(x) < 3 & abs(y) < 3 & ready_to_stop
@@ -186,6 +186,8 @@ The robot would run into issues if the space required to 'park' the robot would 
 ## 3.2 Obstacle Avoidance
 
 ## 3.3 Returning home
+
+The robot is returning to the point of origin quite reliably. The threshold of 3 millimeters seems to be satisfactory. We have had one case where the robot did not stop at the point of origin because the displacement in both x and y was greater than 3. However, this only a single occurence and we were not able to reproduce it.
 
 # 4 Discussion
 
