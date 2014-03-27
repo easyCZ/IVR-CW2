@@ -10,12 +10,9 @@ Introduction to Vision and Robotics 2014
 
 ## 1.1 The Task
 
-The idea of the task is to design an algorithm to allow a Kephera robot to move through an environment while maintaining relatively constant distance from the walls and obstacles. The environment consists of a room with obstacles (boxes). The robot is required to carefully drive around the obstacles without hitting them. The robot continues following the walls until another obstacle is found.
-
-The task is divided into two sections, in the first the robot is not required to stop at any point and keeps on driving around the room indefinitely. This is similar to a vacuum cleaner robot used in households. The second task is comparable to a surveillance robot where the robot traces around the walls, maintaining constant distance and avoiding obstacles, but it is required to stop when it completes a lap. It should be stopped on the same spot where it originally started.
+The idea of the task is to design an algorithm to allow a Kephera robot to move through an environment while maintaining constant distance from the walls and avoid obstacles. The robot is required to carefully drive around the obstacles without hitting them. The robot continues following the walls until another obstacle is found. The robot should stop at the point of origin, that is the place where it originated (first started to follow a path).
 
 The Kephera robot has two motors on each side of the robot as well as eight sensor positioned around the robot. The sensors can be used to retrieve the distances of objects around the robot.
-
 
 ## 1.2 Main Ideas
 
@@ -23,10 +20,9 @@ The main ideas used in the implementation are the following: *following a wall*,
 
 Following a wall is based on the concept of a *Proportional Integral Derivative* (PID) controller where ideal situations are established and deviations from the ideal position are corrected for. Additionally, to the proportional error function, we also use the integral error (or cumulative error function) to influence the amount by which we correct for the ideal position error to speed the process. In essence, we do not use all the three parts of PID as the derivative component was not necessary.
 
-In order to avoid obstacles in the path, we switch a *rotate* mode where the wheels of the robot are set to rotate on the spot. The *rotate* mode is exited when the sensor provide sufficient evidence of having rotated enough. In the next stage the PID controller is restarted and following a wall is resumed.
+In order to avoid obstacles in the path, we switch to a *rotate* mode where the wheels of the robot are set to rotate on the spot. The *rotate* mode is exited when the sensor provide sufficient evidence of having rotated enough. In the next stage the PID controller is restarted and following a wall is resumed.
 
-Returning to the home location is done through relative odometry calculations. Initially, the relative location of the robot is zero and every action updates the internal representation of position. As the robot approaches its home location, the relative location will be approaching zero and the robot stops.
-
+Returning to the home location is done through relative odometry calculations. Initially, the relative location of the robot is zero on both axes and every action updates the internal representation of position. As the robot approaches its home location, the relative location will be approaching zero and the robot stops.
 
 #2 Methods
 
@@ -36,44 +32,45 @@ The PI Controller is based on proportional error from an optimal point and facto
 
 Firstly, we select a set point `set_point` which represents the ideal reading of a sensor. Secondly, we compute the proportional part of the PI controller, to do this we find the offset of the current reading `current_reading` from the ideal value. Finally, we use a value of gain, `p_gain` to fine tune the proportional component.
 
-`proportional = (set_point - current_reading) * p_gain`
+`p = (set_point - pv) * p_gain`
 
 Secondly, we keep track of the cumulative error function, that is the past errors and their corrections. The error function allows us to influence the action that needs to be executed next. For example, if the error is high, the turn action executed next should be faster than if the error were low. The current error can be computed similarly to the *proportional* component. Initially, we find the offset and multiply by integral gain constant `i_gain`.
 
-`integral = (set_point - current_reading) * i_gain`
+`ii = (set_point - pv) * i_gain`
 
 Next, the cumulative error is updated with the value of the *integral* component.
 
-`c_error = c_error + integral`
+`acum_error = acum_error + ii`
 
 Finally, the return value of the PI Controller becomes the sum of the cumulative error and the proportional.
 
-`pi = propotional + c_error`
+`out = p + acum_error`
 
-The resulting action will be stronger if the error is high and vice versa. The actions will eventually stabilize in an equilibrium until an obstacle or non-straight line object is found.
+The resulting action will be stronger if the error is high and vice versa. The actions will eventually stabilise in an equilibrium until an obstacle or non-straight line object is found.
 
 The values of *P_GAIN = 0.05;* was selected based on the following formula. Ideally we want the right sensor reading to be 700, setting the ideal position at 600 results in a 100 unit difference. We wanted to set the speed of 5 at that point so we set the P_GAIN to *0.05* to make it 5 when scaled down.
 
-The value of *I_GAIN = 0.0.002* was selected experimentally.
+The value of *I_GAIN = 0.0002* was selected experimentally. It provides the ideal correction.
 
 ## 2.2 Wall following
 
 Wall following is done using only one sensor, namely the sensor located at three o'clock of the robot. The robot only rotates one way and follows the wall on its right hand side.
 
-Firstly, we obtain the distance readings from the sensors. The readings are saved into a list of `sensor_values`.
+Firstly, we obtain the distance readings from the sensors. The readings are saved into an array of `sensor_values`.
+
 ```
 for i = 1 : SENSOR_COUNT
     sensor_values(i) = wb_distance_sensor_get_value(ps(i));
 end
 ```
 
-Secondly, we calculate the PID value of the sensor located at three o'clock of the robot given the ideal distance from the wall `distance_thresh`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
+Secondly, we calculate the PI value of the sensor located at three o'clock of the robot given the ideal distance from the wall `DISTANCE_THRESH`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
 
 ```
 [motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
 ```
 
-Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important to be maintain reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
+Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important for maintaining reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
 
 ```
 vright = clamp(-motors_pid, -10, 10);
@@ -89,19 +86,19 @@ The distribution of speeds for each wheel is done with the following code:
 vleft = 12 - abs(vright);
 ```
 
-Finally, the motor speeds of the Kephera robot are updates:
+Finally, the motor speeds of the Kephera robot are updated:
 
 ```
 wb_differential_wheels_set_speed(vleft, vright);
 ```
 
-
 ## 2.3 Obstacle Avoidance
 
-Obstacle avoidance requires the PID results to be overridden as PID is not suitable for obstacle avoidance. When avoiding an obstacle, the controller switches into a `turning` mode where it will rotate on the spot to the left until the sensor readings indicate that a turn has been made and it is okay to switch back to line following mode. In the implementation, this is done with nested if statements.
+Obstacle avoidance requires the PI results to be overridden as PI is not suitable for obstacle avoidance. When avoiding an obstacle, the controller switches into a `turning` mode where it will rotate on the spot to the left until the sensor readings indicate that a turn has been made and it is okay to switch back to line following mode. In the implementation, this is done with nested if statements.
 
 ### 2.3.1 Detecting obstacles
-In order to detect an obstacle in front of the robot, we use two sensors located at the front of the robot. If an obstacle closer to a threshold is detected, the robot switches into *turn* mode, indicated by `is_turning` flag, and begins rotating left on the spot.
+
+In order to detect an obstacle in front of the robot, we use two sensors located at the front of the robot. If an obstacle closer to a threshold is detected, the robot switches into a *turn* mode, indicated by the `is_turning` flag, and begins rotating left on the spot.
 
 ```
 if sensor_values(4) > 670 & sensor_values(3) > 670
@@ -113,7 +110,7 @@ if sensor_values(4) > 670 & sensor_values(3) > 670
 
 ### 2.3.2 Rotations
 
-When the robot is in the *turning* mode, the robot will keep rotating until the sensor located on the right hand side at two o'clock is below a threshold. The mode is switched back to *follow a line* and the errors collected for the PID are re-set.
+When the robot is in the *turning* mode, the robot will keep rotating until the sensor located on the right hand side at two o'clock is below a threshold of 400. The mode is switched back to *follow a line* and the errors collected for the PID are re-set.
 
 ```
 if is_turning
@@ -196,8 +193,6 @@ The robot would run into issues if the space required to 'park' the robot would 
 Generally, the robot is able to avoid all convex obstacles. In a couple of instances the robot crashes into the corner of the obstacle. This, however, only occurs in couple of instances. The image below shows a case where the robot may get stuck.
 
 A possible solution to this problem is better fine tuning of the parameters and using multiple sensors.
-
-
 
 ## 3.3 Returning home
 
