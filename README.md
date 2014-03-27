@@ -198,3 +198,5 @@ The robot is returning to the point of origin reliably. The threshold of 3 milli
 ## 4.1 Future Improvements
 
 ## 4.2 Work distribution
+
+We have worked on the assignment together. The work distribution should be 50:50.
