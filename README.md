@@ -32,19 +32,27 @@ The PI Controller is based on proportional error from an optimal point and facto
 
 Firstly, we select a set point `set_point` which represents the ideal reading of a sensor. Secondly, we compute the proportional part of the PI controller, to do this we find the offset of the current reading `current_reading` from the ideal value. Finally, we use a value of gain, `p_gain` to fine tune the proportional component.
 
-`p = (set_point - pv) * p_gain`
+```{.matlab}
+p = (set_point - pv) * p_gain
+```
 
 Secondly, we keep track of the cumulative error function, that is the past errors and their corrections. The error function allows us to influence the action that needs to be executed next. For example, if the error is high, the turn action executed next should be faster than if the error were low. The current error can be computed similarly to the *proportional* component. Initially, we find the offset and multiply by integral gain constant `i_gain`.
 
-`ii = (set_point - pv) * i_gain`
+```{.matlab}
+ii = (set_point - pv) * i_gain
+```
 
 Next, the cumulative error is updated with the value of the *integral* component.
 
-`acum_error = acum_error + ii`
+```
+acum_error = acum_error + ii
+```
 
 Finally, the return value of the PI Controller becomes the sum of the cumulative error and the proportional.
 
-`out = p + acum_error`
+```
+out = p + acum_error
+```
 
 The resulting action will be stronger if the error is high and vice versa. The actions will eventually stabilise in an equilibrium until an obstacle or non-straight line object is found.
 
@@ -58,7 +66,7 @@ Wall following is done using only one sensor, namely the sensor located at three
 
 Firstly, we obtain the distance readings from the sensors. The readings are saved into an array of `sensor_values`.
 
-```
+```{.matlab}
 for i = 1 : SENSOR_COUNT
     sensor_values(i) = wb_distance_sensor_get_value(ps(i));
 end
@@ -66,13 +74,13 @@ end
 
 Secondly, we calculate the PI value of the sensor located at three o'clock of the robot given the ideal distance from the wall `DISTANCE_THRESH`, the proportional gain `P_GAIN` and the cumulative error gain `I_GAIN`. We also supply the current cumulative error value in order to update it inside the *pid* function.
 
-```
+```{.matlab}
 [motors_pid, errors] = pid(sensor_values(6), distance_thresh, P_GAIN, I_GAIN, errors);
 ```
 
 Thirdly, the speed on the right motor `vright` is calculated as the capped value of the `motors_pid` result between -10 and 10. The capping is important for maintaining reasonable speeds in situations where the cumulative error is large and the distance from the ideal position is large too. We take the negative value of the `motors_pid` value to reverse the relationship between sensor readings and actual distance. The implementation of Kephera returns large sensor readings when the robot is close while small values when it is far away.
 
-```
+```{.matlab}
 vright = clamp(-motors_pid, -10, 10);
 ```
 
@@ -82,13 +90,13 @@ For example, if the robot is far away from the wall and the sensor reads a value
 
 The distribution of speeds for each wheel is done with the following code:
 
-```
+```{.matlab}
 vleft = 12 - abs(vright);
 ```
 
 Finally, the motor speeds of the Kephera robot are updated:
 
-```
+```{.matlab}
 wb_differential_wheels_set_speed(vleft, vright);
 ```
 
@@ -100,7 +108,7 @@ Obstacle avoidance requires the PI results to be overridden as PI is not suitabl
 
 In order to detect an obstacle in front of the robot, we use two sensors located at the front of the robot. If an obstacle closer to a threshold is detected, the robot switches into a *turn* mode, indicated by the `is_turning` flag, and begins rotating left on the spot.
 
-```
+```{.matlab}
 if sensor_values(4) > 670 & sensor_values(3) > 670
     is_turning = true;
     turn_distance = sensor_values(4);
@@ -112,7 +120,7 @@ if sensor_values(4) > 670 & sensor_values(3) > 670
 
 When the robot is in the *turning* mode, the robot will keep rotating until the sensor located on the right hand side at two o'clock is below a threshold of 400. The mode is switched back to *follow a line* and the errors collected for the PID are re-set.
 
-```
+```{.matlab}
 if is_turning
     if sensor_values(5) <= 400
         is_turning = false;
@@ -132,13 +140,13 @@ Using odometry with the Kepehera robots requires the use of encoders as the simu
 
 Firstly, we enable the use of encoders, passing in the *TIME_STAMP*.
 
-```
+```{.matlab}
 wb_differential_wheels_enable_encoders(TIME_STEP);
 ```
 
 Secondly, we retrieve the encoder values and convert them to the number of revolutions. The revolutions are then converted to millimeters to be consistent with the rest of the units in the implementation.
 
-```
+```{.matlab}
 encoder_values = [wb_differential_wheels_get_left_encoder() wb_differential_wheels_get_right_encoder()];
 encoder_values = encoder_values / (2 * 100.0 * pi);
 encoder_values = encoder_values * 2 * pi * WHEEL_RADIUS;
@@ -146,7 +154,7 @@ encoder_values = encoder_values * 2 * pi * WHEEL_RADIUS;
 
 Thirdly, we calculate relative position changes and update our internal coordinate system with the *x*, *y* and *angle* values.
 
-```
+```{.matlab}
 x = x + 0.5 * (encoder_values(1) + encoder_values(2)) * cos(theta);
 y = y + 0.5 * (encoder_values(1) + encoder_values(2)) * sin(theta);
 theta = theta - 0.5 * (encoder_values(1) - encoder_values(2)) / (ROBOT_RADIUS);
@@ -154,7 +162,7 @@ theta = theta - 0.5 * (encoder_values(1) - encoder_values(2)) / (ROBOT_RADIUS);
 
 To determine the *home location*, it is sufficient to check that the *x* and *y* coordinates are within a threshold - we use 3 millimeters.
 
-```
+```{.matlab}
 if abs(x) < 3 & abs(y) < 3 & ready_to_stop
     wb_differential_wheels_set_speed(0, 0);
     ...
@@ -178,6 +186,8 @@ The image below shows how the robot stabilizes its position relative to the wall
 
 ![Wall follower chart](img/wall_follower_chart.png)
 
+\newpage
+
 The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The image shows the movements of the robot on the image. The robot initially moves right and forward.
 
 ![Obstacle chart](img/obstacle_chart2.png)
@@ -187,6 +197,8 @@ The lines merge together as there is one very narrow path around the obstacles a
 The robot does not have any issues when approaching, entering and leaving the corner points of the world. This is due to the carefully selected value of distance threshold of 700 which allows it to stay in the middle the walls leaving enough room for maneuverability.
 
 The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
+
+\newpage
 
 ## 3.2 Obstacle Avoidance
 
@@ -204,6 +216,8 @@ Additionally, when avoiding an obstacle the robot may overturn slightly, this co
 
 On the second image, the robot has gone too far and will not attempt to find the wall again in a jerky motion. This could be improved through a faster update of the sensor values.
 
+\newpage
+
 ## 3.3 Returning home
 
 The robot is returning to the point of origin reliably. The threshold of 3 millimeters seems to be satisfactory. We have had one case where the robot did not stop at the point of origin because the displacement in both *x* and *y* was greater than 3. However, this only a single occurence and we were not able to reproduce it. Below is a picture of an example environment that we tested odometry on and a scatter plot of *x* and *y* positions relative to the origin.
@@ -211,6 +225,8 @@ The robot is returning to the point of origin reliably. The threshold of 3 milli
 ![No obstacles environment](img/wall_follow_screen.png)
 
 ![No obstacles chart](img/odometry_chart.png)
+
+\newpage
 
 # 4 Discussion
 
