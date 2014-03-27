@@ -197,7 +197,7 @@ Generally, the robot is able to avoid all convex obstacles. In a couple of insta
 
 A possible solution to this problem is better fine tuning of the parameters and using multiple sensors.
 
-
+Additionally, when avoiding an obstacle the robot may overturn slightly, this could be improved through
 
 ## 3.3 Returning home
 
