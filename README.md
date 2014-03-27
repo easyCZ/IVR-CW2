@@ -52,6 +52,10 @@ Finally, the return value of the PI Controller becomes the sum of the cumulative
 
 The resulting action will be stronger if the error is high and vice versa. The actions will eventually stabilize in an equilibrium until an obstacle or non-straight line object is found.
 
+The values of *P_GAIN = 0.05;* was selected based on the following formula. Ideally we want the right sensor reading to be 700, setting the ideal position at 600 results in a 100 unit difference. We wanted to set the speed of 5 at that point so we set the P_GAIN to *0.05* to make it 5 when scaled down.
+
+The value of *I_GAIN = 0.0.002* was selected experimentally.
+
 ## 2.2 Wall following
 
 Wall following is done using only one sensor, namely the sensor located at three o'clock of the robot. The robot only rotates one way and follows the wall on its right hand side.
@@ -163,6 +167,10 @@ else
 end
 ```
 
+## 2.5 Thresholds
+
+Majority of the thresholds used in the implementation were selected through experimentation. In order to make our thresholding easier, we limited ourselves to one threshold at a time, only adding the next once fairly good values have been obtained.
+
 # 3 Results
 
 ## 3.1 Distance Control
@@ -184,6 +192,12 @@ The robot does not have any issues when approaching, entering and leaving the co
 The robot would run into issues if the space required to 'park' the robot would be close to the width of the robot and the sensor distance threshold. A solution for this problem would to use sensors on the other side and 'verify' that the robot can possibly fit.
 
 ## 3.2 Obstacle Avoidance
+
+Generally, the robot is able to avoid all convex obstacles. In a couple of instances the robot crashes into the corner of the obstacle. This, however, only occurs in couple of instances. The image below shows a case where the robot may get stuck.
+
+A possible solution to this problem is better fine tuning of the parameters and using multiple sensors.
+
+
 
 ## 3.3 Returning home
 

@@ -523,7 +523,7 @@ DEF KHEPERA DifferentialWheels {
       }
     ]
   }
-  controller "odometric"
+  controller "controller"
   synchronization FALSE
   axleLength 0.053
   wheelRadius 0.008
