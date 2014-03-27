@@ -198,3 +198,5 @@ In the case of a room with no obstacles, the robot has no issues running around.
 ## 4.1 Future Improvements
 
 ## 4.2 Work distribution
+
+We have worked on the assignment together. The work distribution should be 50:50.
