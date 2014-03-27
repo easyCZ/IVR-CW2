@@ -179,11 +179,11 @@ The implementation aims to keep a constant distance from the walls. The ideal va
 
 The image below shows how the robot stabilizes its position relative to the wall as it runs straight. There are still fluctuations, but the values are getting progressively smoother.
 
-![Wall follower chart](./img/wall_follower_chart.png)
+![Wall follower chart](img/wall_follower_chart.png)
 
 The robot is able to maintain the distance from the wall fairly well. There are deviations but the overall movement is smooth. The image shows the movements of the robot on the image. The robot initially moves right and forward.
 
-![Obstacle chart](./img/obstacle_chart2.png)
+![Obstacle chart](img/obstacle_chart2.png)
 
 The lines merge together as there is one very narrow path around the obstacles and the same path is taken when going both ways.
 
@@ -203,13 +203,21 @@ Additionally, when avoiding an obstacle the robot may overturn slightly, this co
 
 The robot is returning to the point of origin reliably. The threshold of 3 millimeters seems to be satisfactory. We have had one case where the robot did not stop at the point of origin because the displacement in both *x* and *y* was greater than 3. However, this only a single occurence and we were not able to reproduce it. Below is a picture of an example environment that we tested odometry on and a scatter plot of *x* and *y* positions relative to the origin.
 
-![No obstacles environment](./img/wall_follow_screen.png)
+![No obstacles environment](img/wall_follow_screen.png)
 
-![No obstacles chart](./img/odometry_chart.png)
+![No obstacles chart](img/odometry_chart.png)
 
 # 4 Discussion
 
 ## 4.1 Future Improvements
+
+We think that the algorithms that we developed are reasonably successful in obstacle avoidance, wall following and odometry. There are few ideas that we would have liked to explore given more time:
+
+- Use all of the sensors for more fluid and accurate wall following and movement in general. Currently, our robot's movement are a little bit jerky when it goes around the corner. This could be improved by careful thresholding of all of the sensor values.
+
+- Try porting our code to the real Khepera robot. We have not implemented a version that works with the real robots but we think making our code work with it would not require much more effort.
+
+- Use the derivative term of the PID controller. Currently, we only use the proportional and integral terms. This works pretty well, however with the derivative term we could improve the settiling time and stability of the robot.
 
 ## 4.2 Work distribution
 
