@@ -193,6 +193,12 @@ The robot would run into issues if the space required to 'park' the robot would 
 
 ## 3.2 Obstacle Avoidance
 
+Generally, the robot is able to avoid all convex obstacles. In a couple of instances the robot crashes into the corner of the obstacle. This, however, only occurs in couple of instances. The image below shows a case where the robot may get stuck.
+
+A possible solution to this problem is better fine tuning of the parameters and using multiple sensors.
+
+
+
 ## 3.3 Returning home
 
 The robot is returning to the point of origin reliably. The threshold of 3 millimeters seems to be satisfactory. We have had one case where the robot did not stop at the point of origin because the displacement in both *x* and *y* was greater than 3. However, this only a single occurence and we were not able to reproduce it. Below is a picture of an example environment that we tested odometry on and a scatter plot of *x* and *y* positions relative to the origin.
