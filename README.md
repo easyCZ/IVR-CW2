@@ -1,11 +1,6 @@
 Introduction to Vision and Robotics 2014
 ======
 
-*Mark Nemec, Milan Pavlik*
-
-*s1140740, s1115104*
-
-
 # 1 Introduction
 
 ## 1.1 The Task
